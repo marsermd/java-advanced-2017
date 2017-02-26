@@ -13,6 +13,7 @@ import org.junit.runner.Description;
 import org.junit.runners.MethodSorters;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.java.quickcheck.generator.CombinedGenerators.excludeValues;
 import static net.java.quickcheck.generator.CombinedGenerators.lists;
@@ -25,6 +26,9 @@ import static net.java.quickcheck.generator.PrimitiveGenerators.integers;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class SortedSetTest extends BaseTest {
+
+    public static final int PERFORMANCE_SIZE = 100_000;
+
     @Rule
     public TestRule watcher = new TestWatcher() {
         protected void starting(final Description description) {
@@ -78,6 +82,11 @@ public class SortedSetTest extends BaseTest {
     }
 
     @Test
+    public void test05_constructorPerformance() {
+        performance("constructor", () -> performanceSet(PERFORMANCE_SIZE));
+    }
+
+    @Test
     public void test06_immutable() {
         final SortedSet<Integer> set = set(Collections.singletonList(1));
         checkUnsupported(() -> set.add(1));
@@ -121,6 +130,16 @@ public class SortedSetTest extends BaseTest {
     }
 
     @Test
+    public void test08_containsPerformance() {
+        performance("contains", () -> {
+            final SortedSet<Integer> set = performanceSet(PERFORMANCE_SIZE);
+            for (final Integer element : set) {
+                Assert.assertTrue(null, set.contains(element));
+            }
+        });
+    }
+
+    @Test
     public void test09_containsAll() {
         for (final Pair<NamedComparator, List<Integer>> pair : withComparator()) {
             final List<Integer> elements = pair.getSecond();
@@ -139,11 +158,33 @@ public class SortedSetTest extends BaseTest {
         }
     }
 
+    @Test
+    public void test10_containsAllPerformance() {
+        performance("contains", () -> {
+            final SortedSet<Integer> set = performanceSet(PERFORMANCE_SIZE);
+            Assert.assertTrue(null, set.containsAll(new ArrayList<>(set)));
+        });
+    }
+
+    private void performance(final String description, final Runnable runnable) {
+        runnable.run();
+
+        final long start = System.currentTimeMillis();
+        runnable.run();
+        final long time = System.currentTimeMillis() - start;
+        System.out.println("    " + description + " done in " + time + "ms");
+        Assert.assertTrue(description + " works too slow", time < 200);
+    }
+
+    private SortedSet<Integer> performanceSet(final int size) {
+        return set(new Random().ints().limit(size).boxed().collect(Collectors.toList()));
+    }
+
     private List<Integer> toList(final SortedSet<Integer> set) {
         return new ArrayList<>(set);
     }
 
-    private List<Number> toArray(final SortedSet<Integer> set) {
+    protected List<Number> toArray(final SortedSet<Integer> set) {
         return Arrays.asList(set.toArray(new Number[set.size()]));
     }
 
@@ -307,16 +348,16 @@ public class SortedSetTest extends BaseTest {
         return concat(inAndOut(elements), Arrays.asList(0, Integer.MAX_VALUE, Integer.MIN_VALUE));
     }
 
-//    @Test
-//    public void test15_tailSetPerformance() {
-//        performance("tailSet", () -> {
-//            final SortedSet<Integer> set = performanceSet(PERFORMANCE_SIZE);
-//            for (final Integer element : set) {
-//                Assert.assertTrue(null, set.tailSet(element).contains(element));
-//            }
-//        });
-//    }
-//
+    @Test
+    public void test15_tailSetPerformance() {
+        performance("tailSet", () -> {
+            final SortedSet<Integer> set = performanceSet(PERFORMANCE_SIZE);
+            for (final Integer element : set) {
+                Assert.assertTrue(null, set.tailSet(element).contains(element));
+            }
+        });
+    }
+
     @Test
     public void test16_first() {
         for (final Pair<NamedComparator, List<Integer>> pair : withComparator()) {

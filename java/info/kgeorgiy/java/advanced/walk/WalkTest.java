@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -29,7 +30,7 @@ import java.util.Random;
 public class WalkTest extends BaseTest {
     protected static final Path DIR = Paths.get("__Test__Walk__");
     private static String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    protected static final Random random = new Random(23084701432182342L);
+    protected static final Random RANDOM = new Random(23084701432182342L);
 
     @Rule
     public TestName name = new TestName();
@@ -92,11 +93,16 @@ public class WalkTest extends BaseTest {
     @Test
     public void test10_invalidInput() throws IOException {
         runRaw("/", randomFileName());
+        runRaw("\0*", randomFileName());
     }
 
     @Test
     public void test11_invalidOutput() throws IOException {
-        runRaw(createEmptyFile(name.getMethodName()), "/");
+        final String input = createEmptyFile(name.getMethodName());
+        runRaw(input, "/");
+        runRaw(input, "\0*");
+        final String file = createEmptyFile(name.getMethodName());
+        runRaw(input, file + "/" + randomFileName());
     }
 
     @Test
@@ -106,9 +112,14 @@ public class WalkTest extends BaseTest {
 
     @Test
     public void test13_veryLargeFile() throws IOException {
-        final String alphabet = ALPHABET;
-        ALPHABET = "\u8acb\u554f\u4f60\u7684\u7a0b\u5e8f\u652f\u6301\u4e2d\u570b";
         test(randomFiles(1, 100_000_00));
+    }
+
+    @Test
+    public void test14_invalidFiles() throws IOException {
+        final String alphabet = ALPHABET;
+        ALPHABET = "\0\\*";
+        test(randomFiles(1, 10));
         ALPHABET = alphabet;
     }
 
@@ -193,11 +204,16 @@ public class WalkTest extends BaseTest {
         Files.createDirectories(dir);
         final Map<String, Integer> result = new HashMap<>();
         for (int i = 0; i < n; i++) {
-            final Path file = dir.resolve(randomFileName());
-            final byte[] bytes = new byte[random.nextInt(maxL + 1)];
-            random.nextBytes(bytes);
-            Files.write(file, bytes);
-            result.put(file.toString(), hash(bytes));
+            final String name = randomFileName();
+            try {
+                final Path file = dir.resolve(name);
+                final byte[] bytes = new byte[RANDOM.nextInt(maxL + 1)];
+                RANDOM.nextBytes(bytes);
+                Files.write(file, bytes);
+                result.put(file.toString(), hash(bytes));
+            } catch (final InvalidPathException ignore) {
+                result.put(dir + "/" + name, 0);
+            }
         }
         return result;
     }
@@ -205,7 +221,7 @@ public class WalkTest extends BaseTest {
     protected String randomFileName() {
         final StringBuilder sb = new StringBuilder();
         for (int j = 0; j < 30; j++) {
-            sb.append(ALPHABET.charAt(random.nextInt(ALPHABET.length())));
+            sb.append(ALPHABET.charAt(RANDOM.nextInt(ALPHABET.length())));
         }
         return sb.toString();
     }

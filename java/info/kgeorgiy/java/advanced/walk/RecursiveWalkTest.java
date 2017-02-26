@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RecursiveWalkTest extends WalkTest {
     @Test
-    public void test13_singleRecursion() throws IOException {
+    public void test15_singleRecursion() throws IOException {
         final Path root = DIR.resolve(name.getMethodName());
         test(Collections.singletonList(root.toString()), randomDirs(3, 4, 100, root));
     }
 
     @Test
-    public void test14_doubleRecursion() throws IOException {
+    public void test16_doubleRecursion() throws IOException {
         final Path root = DIR.resolve(name.getMethodName());
         final Path dir1 = root.resolve(randomFileName());
         final Path dir2 = root.resolve(randomFileName());
@@ -38,9 +38,9 @@ public class RecursiveWalkTest extends WalkTest {
     }
 
     private Map<String, Integer> randomDirs(final int n, final int d, final int maxL, final Path dir) throws IOException {
-        final Map<String, Integer> result = randomFiles(random.nextInt(n + 1), maxL, dir);
+        final Map<String, Integer> result = randomFiles(RANDOM.nextInt(n + 1), maxL, dir);
         if (d > 0) {
-            for (int i = random.nextInt(n + 1); i < n; i++) {
+            for (int i = RANDOM.nextInt(n + 1); i < n; i++) {
                 result.putAll(randomDirs(n, d - 1, maxL, dir.resolve(randomFileName())));
             }
         }
