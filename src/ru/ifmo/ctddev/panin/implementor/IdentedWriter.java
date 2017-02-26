@@ -10,6 +10,7 @@ public class IdentedWriter
 {
     private final BufferedWriter writer;
     private int identCnt = 0;
+    private boolean newLine = true;
 
     public IdentedWriter(BufferedWriter writer)
     {
@@ -37,14 +38,14 @@ public class IdentedWriter
 
     public IdentedWriter endBlock() throws IOException
     {
-        printLine("}");
         unindent();
+        printLine("}");
         return this;
     }
 
     public IdentedWriter print(String value) throws IOException
     {
-        writer.write(value);
+        write(value);
         return this;
     }
 
@@ -56,18 +57,33 @@ public class IdentedWriter
 
     public IdentedWriter printToken(String token) throws IOException
     {
-        writer.write(token + " ");
+        write(token + " ");
         return this;
     }
 
     public IdentedWriter printLine(String line) throws IOException
     {
-        for (int i = 0; i < identCnt; i++)
-        {
-            writer.write("\t");
-        }
-        writer.write(line);
-        writer.newLine();
+        write(line);
+        newLine();
         return this;
+    }
+
+    private void write(String value) throws IOException
+    {
+        if (newLine)
+        {
+            for (int i = 0; i < identCnt; i++)
+            {
+                writer.write("    ");
+            }
+        }
+        writer.write(value);
+        newLine = false;
+    }
+
+    private void newLine() throws IOException
+    {
+        writer.newLine();
+        newLine = true;
     }
 }

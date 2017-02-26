@@ -48,7 +48,7 @@ public class InterfaceImplementor
     {
         printModifiers(method.getModifiers(), Modifier.fieldModifiers());
         writer.printToken(method.getReturnType().getCanonicalName())
-            .printToken(method.getName())
+            .print(method.getName())
             .printInBrackets(getMethodParameters(method))
             .printLine(getThrows(method))
             .beginBlock();
