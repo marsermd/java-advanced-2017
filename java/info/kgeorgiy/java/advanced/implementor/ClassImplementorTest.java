@@ -1,5 +1,6 @@
 package info.kgeorgiy.java.advanced.implementor;
 
+import info.kgeorgiy.java.advanced.implementor.examples.ClassWithPackagePrivateConstructor;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -16,6 +17,7 @@ import javax.management.remote.rmi.RMIIIOPServerImpl;
 import javax.management.remote.rmi.RMIServerImpl;
 import javax.naming.ldap.LdapReferralException;
 import java.io.IOException;
+import java.util.Formatter;
 
 /**
  * @author Georgiy Korneev (kgeorgiy@kgeorgiy.info)
@@ -43,7 +45,37 @@ public class ClassImplementorTest extends InterfaceImplementorTest {
     }
 
     @Test
+    public void test11_finalClasses() throws IOException {
+        test(true, Integer.class, String.class);
+    }
+
+    @Test
     public void test12_standardNonClasses() throws IOException {
         test(true, void.class, String[].class, int[].class, String.class, boolean.class);
+    }
+
+    @Test
+    public void test13_constructorThrows() throws IOException {
+        test(false, FileCacheImageInputStream.class);
+    }
+
+    @Test
+    public void test14_nonPublicAbstractMethod() throws IOException {
+        test(false, RMIServerImpl.class, RMIIIOPServerImpl.class);
+    }
+
+    @Test
+    public void test15_inheritedNonPublicAbstractMethod() throws IOException {
+        test(false, ORB.class);
+    }
+
+    @Test
+    public void test16_enum() throws IOException {
+        test(true, Enum.class, Formatter.BigDecimalLayoutForm.class);
+    }
+
+    @Test
+    public void test17_packagePrivateConstructor() throws IOException {
+        test(false, ClassWithPackagePrivateConstructor.class);
     }
 }
