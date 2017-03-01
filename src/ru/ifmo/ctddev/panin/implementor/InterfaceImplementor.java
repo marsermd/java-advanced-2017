@@ -1,5 +1,6 @@
 package ru.ifmo.ctddev.panin.implementor;
 
+import info.kgeorgiy.java.advanced.implementor.ImplerException;
 import org.junit.runners.Parameterized;
 
 import java.io.BufferedWriter;
@@ -18,8 +19,17 @@ public class InterfaceImplementor
 
     private IdentedWriter writer;
 
-    public InterfaceImplementor(Class<?> parent, String implClassName)
+    private static void ValidateToken(Class<?> token) throws ImplerException
     {
+        if (!token.isInterface())
+        {
+            throw new ImplerException("Can't implement" + token);
+        }
+    }
+
+    public InterfaceImplementor(Class<?> parent, String implClassName) throws ImplerException
+    {
+        ValidateToken(parent);
         this.parent = parent;
         this.implClassName = implClassName;
     }
