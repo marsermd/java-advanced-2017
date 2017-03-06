@@ -1,16 +1,14 @@
 package ru.ifmo.ctddev.panin.implementor;
 
 import info.kgeorgiy.java.advanced.implementor.ImplerException;
-import org.junit.runners.Parameterized;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.NoSuchElementException;
 
 /**
- * Created by marsermd on 26.02.2017.
+ * Class that generates interface implementation to a .java file
  */
 public class InterfaceImplementor
 {
@@ -19,14 +17,25 @@ public class InterfaceImplementor
 
     private IdentedWriter writer;
 
-    private static void ValidateToken(Class<?> token) throws ImplerException
+    /**
+     * Checkes if parent can be implemented
+     * @param parent class to be implemented
+     * @throws ImplerException if it can't be implemented
+     */
+    private static void ValidateToken(Class<?> parent) throws ImplerException
     {
-        if (!token.isInterface())
+        if (!parent.isInterface())
         {
-            throw new ImplerException("Can't implement" + token);
+            throw new ImplerException("Can't implement" + parent);
         }
     }
 
+    /**
+     * Create interface implementor
+     * @param parent interface to implement
+     * @param implClassName implementation class name
+     * @throws ImplerException if parent can't be implemented
+     */
     public InterfaceImplementor(Class<?> parent, String implClassName) throws ImplerException
     {
         ValidateToken(parent);
@@ -34,6 +43,11 @@ public class InterfaceImplementor
         this.implClassName = implClassName;
     }
 
+    /**
+     * Fill file with implementation
+     * @param writer writer to implementation file
+     * @throws IOException if writing fails
+     */
     public void build(BufferedWriter writer) throws IOException
     {
         this.writer = new IdentedWriter(writer);
@@ -44,6 +58,10 @@ public class InterfaceImplementor
         classEnd();
     }
 
+    /**
+     * Generate implementation for methods
+     * @throws IOException if failes printing
+     */
     private void generateMethods() throws IOException
     {
         for (Method method: parent.getMethods())
@@ -54,18 +72,29 @@ public class InterfaceImplementor
         }
     }
 
+    /**
+     * Print method decaration part
+     * @param method method info to print
+     * @throws IOException if failes printing
+     */
     private void beginMethod(Method method) throws IOException
     {
         printModifiers(method.getModifiers(), Modifier.fieldModifiers());
         writer.printToken(method.getReturnType().getCanonicalName())
             .print(method.getName())
-            .printInBrackets(getMethodParameters(method))
+            .printInParenthesis(getMethodParameters(method))
             .printLine(getThrows(method))
             .beginBlock();
     }
 
+    /**
+     * Print method body(returns some default value for returning type)
+     * @param method method to print body for
+     * @throws IOException if failes printing
+     */
     private void returnDefault(Method method) throws IOException
     {
+
         Class<?> returnType = method.getReturnType();
         writer.printToken("return");
         if (returnType.equals(Void.TYPE))
@@ -83,7 +112,12 @@ public class InterfaceImplementor
         writer.printLine(";");
     }
 
-    private String getDefaultForPrimitive(Class<?> primitive) throws IOException
+    /**
+     * Get default value for primitive types
+     * @param primitive type
+     * @return default return value code(0 or false)
+     */
+    private String getDefaultForPrimitive(Class<?> primitive)
     {
         if (primitive == boolean.class)
         {
@@ -95,16 +129,30 @@ public class InterfaceImplementor
         }
     }
 
+    /**
+     * Get default value for normal types
+     * @param primitive type
+     * @return default return value code (null)
+     */
     private String getDefaultForNullable(Class<?> primitive)
     {
         return "null";
     }
 
+    /**
+     * End method body
+     * @throws IOException if failed printings
+     */
     private void endMethod() throws IOException
     {
         writer.endBlock();
     }
 
+    /**
+     * Parse method info to string
+     * @param method method to get parameters from
+     * @return parameters as they would be printed in method declaration
+     */
     private String getMethodParameters(Method method)
     {
         StringBuilder builder = new StringBuilder();
@@ -124,6 +172,11 @@ public class InterfaceImplementor
         return builder.toString();
     }
 
+    /**
+     * Get throws clause of declaration method
+     * @param method method to get throws clause from
+     * @return throws clause as it would be printed in method declaration
+     */
     private String getThrows(Method method)
     {
         StringBuilder builder = new StringBuilder();
@@ -144,6 +197,11 @@ public class InterfaceImplementor
         return builder.toString();
     }
 
+    /**
+     * Print package line
+     * Example: package ru.ifmo.ctddev.panin.implementor;
+     * @throws IOException if failes printing
+     */
     private void printPackage() throws IOException
     {
         writer.printToken("package")
@@ -151,6 +209,10 @@ public class InterfaceImplementor
             .printLine(";");
     }
 
+    /**
+     * Print class declaration
+     * @throws IOException if failes printing
+     */
     private void classStart() throws IOException
     {
         printModifiers(parent.getModifiers(), Modifier.classModifiers());
@@ -161,11 +223,21 @@ public class InterfaceImplementor
             .beginBlock();
     }
 
+    /**
+     * Print class end
+     * @throws IOException if failes printing
+     */
     private void classEnd() throws IOException
     {
         writer.endBlock();
     }
 
+    /**
+     * Print modifiers from modifier with applied mask
+     * @param modifier {@link java.lang.reflect.Modifier}
+     * @param mask bit mask applied to modifier
+     * @throws IOException if failes printing
+     */
     private void printModifiers(int modifier, int mask) throws IOException
     {
         modifier &= mask;
