@@ -43,14 +43,14 @@ public class IterativeParallelism implements ListIP
             threads[i] = new Thread(workers[i]);
         }
 
-        for (Thread thr : threads)
+        for (Thread thread : threads)
         {
-            thr.start();
+            thread.start();
         }
 
-        for (Thread thr : threads)
+        for (Thread thread : threads)
         {
-            thr.join();
+            thread.join();
         }
 
         return reduce.apply(Arrays.stream(workers).map(tWorker -> tWorker.getResult()));
@@ -126,7 +126,7 @@ public class IterativeParallelism implements ListIP
     {
         return parallel(i, list,
             source -> source.stream().allMatch(predicate),
-            results -> results.allMatch(e -> e));
+            results -> results.allMatch(bool -> bool));
     }
 
     @Override
@@ -134,6 +134,6 @@ public class IterativeParallelism implements ListIP
     {
         return parallel(i, list,
             source -> source.stream().anyMatch(predicate),
-            results -> results.anyMatch(e -> e));
+            results -> results.anyMatch(bool -> bool));
     }
 }
