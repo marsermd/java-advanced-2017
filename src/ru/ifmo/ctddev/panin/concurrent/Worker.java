@@ -6,7 +6,7 @@ import java.util.function.Function;
 /**
  * Call {@link #reset()} before executing worker second time
  */
-public class Worker<TSource, TResult> implements Runnable
+class Worker<TSource, TResult> implements Runnable
 {
     private List<? extends TSource> arguments;
     private TResult result;
