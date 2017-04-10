@@ -56,6 +56,11 @@ public class WebCrawler implements Crawler
         downloaderService.shutdownNow();
     }
 
+    /**
+     * Download page by URL and all linked pages recursively
+     * @param url url to start from
+     * @param counter recursion limit
+     */
     private void recursiveDownload(String url, DepthCounter counter)
     {
         if (result.isVisited(url))
