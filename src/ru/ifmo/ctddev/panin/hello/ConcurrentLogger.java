@@ -1,14 +1,29 @@
 package ru.ifmo.ctddev.panin.hello;
 
-public class ConcurrentLogger
+/**
+ * This class provides an blocking way to print to stdout.
+ */
+class ConcurrentLogger
 {
-    public static synchronized void log(String value)
+    /**
+     * @param value print value to stdout
+     */
+    static void log(String value)
     {
-        System.out.println(value);
+        synchronized (System.out)
+        {
+            System.out.println(value);
+        }
     }
 
-    public static synchronized void err(String value)
+    /**
+     * @param value print value to stderr
+     */
+    static void err(String value)
     {
-        System.err.println(value);
+        synchronized (System.err)
+        {
+            System.err.println(value);
+        }
     }
 }

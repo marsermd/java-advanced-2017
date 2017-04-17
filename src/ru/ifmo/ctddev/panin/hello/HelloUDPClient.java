@@ -9,8 +9,17 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Sends requests to server and prints responses in parallel. <br/>
+ * See {@link ClientUDPTask} for more details.
+ */
 public class HelloUDPClient implements HelloClient
 {
+    /**
+     * Commandline interface for HelloUDPClient <br/>
+     * format: HelloUdpClient host port prefix threadCnt requestCnt
+     * @param args arguments.
+     */
     public static void main(String[] args)
     {
         if (args.length != 5)
@@ -25,9 +34,9 @@ public class HelloUDPClient implements HelloClient
             String host = args[0];
             int port = Integer.parseInt(args[1]);
             String prefix = args[2];
-            int threadCnt = Integer.parseInt(args[3]);
+            int threadsCnt = Integer.parseInt(args[3]);
             int requestCnt = Integer.parseInt(args[4]);
-            new HelloUDPClient().start(host, port, prefix, requestCnt, threadCnt);
+            new HelloUDPClient().start(host, port, prefix, requestCnt, threadsCnt);
         }
         catch (NumberFormatException e)
         {
@@ -43,6 +52,15 @@ public class HelloUDPClient implements HelloClient
         System.out.println("HelloUdpClient host port prefix threadCnt requestCnt");
     }
 
+    /**
+     * Start Sending packets. <br/>
+     * See {@link ClientUDPTask} for more details
+     * @param host server's host name.
+     * @param port server's listening port
+     * @param prefix prefix for request
+     * @param requests amount of requests per thread
+     * @param threads amount ofthreads to send the requests
+     */
     @Override
     public void start(String host, int port, String prefix, int requests, int threads)
     {
@@ -55,6 +73,7 @@ public class HelloUDPClient implements HelloClient
                     threadId -> new ClientUDPTask(threadId, requests, prefix, serverAddress)
                 ).collect(Collectors.toList())
             );
+            // All tasks are already finished, so it is safe to shutdown pool.
             threadPool.shutdown();
         }
         catch (InterruptedException e)

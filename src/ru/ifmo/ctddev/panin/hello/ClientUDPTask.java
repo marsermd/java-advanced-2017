@@ -8,6 +8,10 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Callable;
 
+/**
+ * Task for HelloUDPClient
+ * Sends udp requests to the given host.
+ */
 class ClientUDPTask implements Callable<Void>
 {
     private int threadId;
@@ -15,6 +19,14 @@ class ClientUDPTask implements Callable<Void>
     private String prefix;
     private InetSocketAddress serverAddress;
 
+    /**
+     * Request format is prefix + threadId + "_" + requestId <br/>
+     * Where requestId is incremented
+     * @param threadId threadId to use in request format.
+     * @param requestsCnt count of requests to send to server
+     * @param prefix prefix to use in request format
+     * @param serverAddress address to send to
+     */
     ClientUDPTask(int threadId, int requestsCnt, String prefix, InetSocketAddress serverAddress)
     {
         this.threadId = threadId;
@@ -23,6 +35,11 @@ class ClientUDPTask implements Callable<Void>
         this.serverAddress = serverAddress;
     }
 
+    /**
+     * Execute task:<br/>
+     * Send requestsCnt requests to server address, print responses to stdout
+     * @return
+     */
     public Void call()
     {
         try (DatagramSocket sock = new DatagramSocket())

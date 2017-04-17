@@ -7,17 +7,33 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.concurrent.Callable;
 
+/**
+ * Task for HelloUDPServer
+ * Listens for requests and sends responses back
+ */
 class ServerUDPTask implements Callable<Void>
 {
     private int bufferSize;
     private DatagramSocket socket;
 
+    /**
+     * Listens to socket for requests
+     * And sends responses of fromat "Hello, " + request
+     * @param bufferSize size of socket's buffer
+     * @param socket socket to operate on
+     */
     ServerUDPTask(int bufferSize, DatagramSocket socket)
     {
         this.bufferSize = bufferSize;
         this.socket = socket;
     }
 
+    /**
+     * Execute task:<br/>
+     * Listen to requests and send responses.
+     * @return
+     * @throws Exception
+     */
     @Override
     public Void call() throws Exception
     {
@@ -29,12 +45,14 @@ class ServerUDPTask implements Callable<Void>
             while (!Thread.interrupted())
             {
                 socket.receive(request);
-                String greeting = new String(
+                String reuestAsString = new String(
                     request.getData(),
                     request.getOffset(),
-                    request.getLength(), Util.CHARSET
+                    request.getLength(),
+                    Util.CHARSET
                 );
-                byte message[] = ("Hello, " + greeting).getBytes(Util.CHARSET);
+                String greeting = "Hello, " + reuestAsString;
+                byte message[] = greeting.getBytes(Util.CHARSET);
 
                 DatagramPacket response = new DatagramPacket(message, message.length, request.getSocketAddress());
                 socket.send(response);

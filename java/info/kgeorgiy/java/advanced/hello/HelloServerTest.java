@@ -65,6 +65,22 @@ public class HelloServerTest extends BaseTest {
         });
     }
 
+    @Test
+    public void test05_parallelRequestsAndResponses() throws Throwable {
+        test(4, port -> socket -> {
+            final Set<String> responses = new HashSet<>();
+            for (int i = 0; i < 10; i++) {
+                final String request = REQUEST + i;
+                responses.add(response(request));
+                send(port, socket, request);
+            }
+            for (int i = 0; i < 10; i++) {
+                final String response = Util.receive(socket);
+                Assert.assertTrue("Unexpected response " + response, responses.remove(response));
+            }
+        });
+    }
+
     private void send(final int port, final DatagramSocket socket, final String request) throws IOException {
         Util.send(socket, request, new InetSocketAddress("localhost", port));
     }
